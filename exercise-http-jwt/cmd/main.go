@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"net/http"
 	"net/url"
 	"os"
 
@@ -27,29 +26,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	client := http.Client{}
+	apiInstance := api.New(api.Options{
+		Password: password,
+		LoginUrl: parsedURL.Scheme + "://" + parsedURL.Host + "/login",
+	})
 
-	api.New()
-
-	if password != "" {
-		token, err := doLoginRequest(client, parsedURL.Scheme+"://"+parsedURL.Host+"/login", password)
-		if err != nil {
-			if requestErr, ok := err.(RequestError); ok {
-				fmt.Printf("Error occurred: %s (HTTP Error: %d, Body: %s)\n", requestErr.Error(), requestErr.HTTPCode, requestErr.Body)
-				os.Exit(1)
-			}
-			fmt.Printf("Error occurred: %s\n", err)
-			os.Exit(1)
-		}
-		client.Transport = &MyJWTTransport{
-			Transport: http.DefaultTransport,
-			Token:     token,
-		}
-	}
-
-	res, err := doRequest(client, parsedURL.String())
+	res, err := apiInstance.DoRequest(parsedURL.String())
 	if err != nil {
-		if requestErr, ok := err.(RequestError); ok {
+		if requestErr, ok := err.(api.RequestError); ok {
 			fmt.Printf("Error occurred: %s (HTTP Error: %d, Body: %s)\n", requestErr.Error(), requestErr.HTTPCode, requestErr.Body)
 			os.Exit(1)
 		}

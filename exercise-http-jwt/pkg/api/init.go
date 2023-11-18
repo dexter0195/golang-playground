@@ -6,10 +6,11 @@ import (
 
 type Options struct {
 	Password string
-	Login    string
+	LoginUrl string
 }
 
 type APIIface interface {
+	DoRequest(requestURL string) (Response, error)
 }
 
 type API struct {
@@ -17,12 +18,14 @@ type API struct {
 	Client  http.Client
 }
 
-func New() APIIface {
+func New(options Options) APIIface {
 	return API{
 		Options: options,
 		Client: http.Client{
 			Transport: &MyJWTTransport{
-				transport: http.DefaultTransport,
+				Transport: http.DefaultTransport,
+				Password:  options.Password,
+				LoginUrl:  options.LoginUrl,
 			},
 		},
 	}
