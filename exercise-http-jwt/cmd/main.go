@@ -1,44 +1,14 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"os"
-	"strings"
+
+	"github.com/dexter0195/golang-playground/exercise-http-jwt/pkg/api"
 )
-
-type Page struct {
-	Name string `json:"page"`
-}
-
-type Response interface {
-	GetResponse() string
-}
-
-type Words struct {
-	Input string   `json:"input"`
-	Words []string `json:"words"`
-}
-
-func (w Words) GetResponse() string {
-	return fmt.Sprintf("Words: %s", strings.Join(w.Words, ", "))
-}
-
-type Occurrence struct {
-	Words map[string]int `json:"words"`
-}
-
-func (o Occurrence) GetResponse() string {
-	words := []string{}
-	for word, occurrence := range o.Words {
-		words = append(words, fmt.Sprintf("%s (%d)", word, occurrence))
-	}
-	return fmt.Sprintf("Words: %s", strings.Join(words, ", "))
-}
 
 func main() {
 	var (
@@ -58,6 +28,8 @@ func main() {
 	}
 
 	client := http.Client{}
+
+	api.New()
 
 	if password != "" {
 		token, err := doLoginRequest(client, parsedURL.Scheme+"://"+parsedURL.Host+"/login", password)
@@ -89,65 +61,4 @@ func main() {
 		os.Exit(1)
 	}
 	fmt.Printf("Response: %s\n", res.GetResponse())
-}
-
-func doRequest(client http.Client, requestURL string) (Response, error) {
-
-	response, err := client.Get(requestURL)
-
-	if err != nil {
-		return nil, fmt.Errorf("Get error: %s", err)
-	}
-
-	defer response.Body.Close()
-
-	body, err := io.ReadAll(response.Body)
-
-	if err != nil {
-		return nil, fmt.Errorf("ReadAll error: %s", err)
-	}
-
-	if response.StatusCode != 200 {
-		return nil, fmt.Errorf("Invalid output (HTTP Code %d): %s\n", response.StatusCode, string(body))
-	}
-
-	var page Page
-
-	if !json.Valid(body) {
-		return nil, RequestError{
-			Err:      fmt.Sprintf("Response is not a json"),
-			HTTPCode: response.StatusCode,
-			Body:     string(body),
-		}
-	}
-
-	err = json.Unmarshal(body, &page)
-	if err != nil {
-		return nil, RequestError{
-			Err:      fmt.Sprintf("Page unmarshal error: %s", err),
-			HTTPCode: response.StatusCode,
-			Body:     string(body),
-		}
-	}
-
-	switch page.Name {
-	case "words":
-		var words Words
-		err = json.Unmarshal(body, &words)
-		if err != nil {
-			return nil, fmt.Errorf("Words unmarshal error: %s", err)
-		}
-
-		return words, nil
-	case "occurrence":
-		var occurrence Occurrence
-		err = json.Unmarshal(body, &occurrence)
-		if err != nil {
-			return nil, fmt.Errorf("Occurrence unmarshal error: %s", err)
-		}
-
-		return occurrence, nil
-	}
-
-	return nil, nil
 }
