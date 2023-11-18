@@ -22,9 +22,9 @@ func (t *MyJWTTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 			}
 			t.Token = token
 		}
-		if t.Token != "" {
-			req.Header.Add("Authorization", "Bearer "+t.Token)
-		}
+	}
+	if t.Token != "" {
+		req.Header.Add("Authorization", "Bearer "+t.Token)
 	}
 	return t.Transport.RoundTrip(req)
 }

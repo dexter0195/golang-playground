@@ -31,18 +31,20 @@ func main() {
 		LoginUrl: parsedURL.Scheme + "://" + parsedURL.Host + "/login",
 	})
 
-	res, err := apiInstance.DoRequest(parsedURL.String())
-	if err != nil {
-		if requestErr, ok := err.(api.RequestError); ok {
-			fmt.Printf("Error occurred: %s (HTTP Error: %d, Body: %s)\n", requestErr.Error(), requestErr.HTTPCode, requestErr.Body)
+	for i := 0; i < 2; i++ {
+		res, err := apiInstance.DoRequest(parsedURL.String())
+		if err != nil {
+			if requestErr, ok := err.(api.RequestError); ok {
+				fmt.Printf("Error occurred: %s (HTTP Error: %d, Body: %s)\n", requestErr.Error(), requestErr.HTTPCode, requestErr.Body)
+				os.Exit(1)
+			}
+			fmt.Printf("Error occurred: %s\n", err)
 			os.Exit(1)
 		}
-		fmt.Printf("Error occurred: %s\n", err)
-		os.Exit(1)
+		if res == nil {
+			fmt.Printf("No response\n")
+			os.Exit(1)
+		}
+		fmt.Printf("Response: %s\n", res.GetResponse())
 	}
-	if res == nil {
-		fmt.Printf("No response\n")
-		os.Exit(1)
-	}
-	fmt.Printf("Response: %s\n", res.GetResponse())
 }
