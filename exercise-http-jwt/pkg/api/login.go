@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"net/http"
 
 	"encoding/json"
 )
@@ -16,7 +15,7 @@ type LoginResponse struct {
 	Token string `json:"token"`
 }
 
-func doLoginRequest(client http.Client, options Options) (string, error) {
+func doLoginRequest(client ClientInterface, options Options) (string, error) {
 	loginRequest := LoginRequest{
 		Password: options.Password,
 	}
@@ -26,7 +25,7 @@ func doLoginRequest(client http.Client, options Options) (string, error) {
 		return "", fmt.Errorf("marshal error: %s", err)
 	}
 
-	res, err := http.Post(options.LoginUrl, "application/json", bytes.NewBuffer(body))
+	res, err := client.Post(options.LoginUrl, "application/json", bytes.NewBuffer(body))
 	if err != nil {
 		return "", fmt.Errorf("post error: %s", err)
 	}

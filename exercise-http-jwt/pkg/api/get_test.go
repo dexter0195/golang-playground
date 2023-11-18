@@ -16,6 +16,9 @@ type MockClient struct {
 func (c *MockClient) Get(url string) (*http.Response, error) {
 	return c.Response, nil
 }
+func (c *MockClient) Post(url string, contentType string, body io.Reader) (*http.Response, error) {
+	return c.Response, nil
+}
 
 func TestDoGetRequest(t *testing.T) {
 
