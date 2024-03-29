@@ -1,0 +1,10 @@
+go 1.21.0
+
+toolchain go1.22.0
+
+// ./top-interview-150/merge-sorted-array
+// ./top-interview-150/rotate-array
+// ./top-interview-150/jump-game
+// ./top-interview-150/jump-game-2
+// ./top-interview-150/valid-palindrome
+use ./top-interview-150/longest-substring-no-repeat
